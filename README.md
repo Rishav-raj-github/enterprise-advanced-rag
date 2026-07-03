@@ -1,10 +1,16 @@
-# 🧬 Enterprise Advanced RAG in LangGraph
+# 🧬 Enterprise Advanced RAG in LangGraph: Cyclic Cognitive Search Platform
 
-An enterprise-grade, state-of-the-art **Retrieval-Augmented Generation (RAG)** platform designed for production-scale, highly-secure cognitive search and analytics. Choreographed by a cyclic state machine built on **LangGraph**, this pipeline seamlessly blends structured **Text-to-SQL database execution** with unstructured **parent-child vector retrieval**, reinforced by re-ranking, Hypothetical Document Embeddings (HyDE), Corrective RAG (CRAG) grader nodes, Self-RAG reflection loops, semantic caching, and strict security guardrails.
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![LangGraph](https://img.shields.io/badge/Choreography-LangGraph-darkgreen.svg?style=for-the-badge&logo=chainlink&logoColor=white)](https://github.com/langchain-ai/langgraph)
+[![Gemini](https://img.shields.io/badge/LLM_Engine-Gemini_2.0_Flash-red.svg?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![ChromaDB](https://img.shields.io/badge/Vector_DB-ChromaDB-blue.svg?style=for-the-badge&logo=databricks&logoColor=white)](https://github.com/chroma-core/chroma)
+[![Numpy](https://img.shields.io/badge/Performance-NumPy_Vectors-cyan.svg?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org)
+
+An enterprise-grade, state-of-the-art **Retrieval-Augmented Generation (RAG)** platform designed for production-scale, highly secure cognitive search and analytics. Choreographed by a cyclic state machine built on **LangGraph**, this pipeline seamlessly blends structured **Text-to-SQL database execution** with unstructured **parent-child vector retrieval**, reinforced by cross-encoder re-ranking, Hypothetical Document Embeddings (HyDE), Corrective RAG (CRAG) grader nodes, Self-RAG reflection loops, local semantic caching, and strict enterprise security guardrails.
 
 ---
 
-## 🗺️ System Architecture
+## 🗺️ System Cognitive Architecture
 
 Below is the state-driven cognitive architecture compiled and orchestrated inside LangGraph:
 
@@ -55,16 +61,17 @@ graph TD
 
 ## ✨ Features & Component Design
 
-1. **Stateful Graph Orchestration (`src/graph/`)**: A cyclical state machine defining clear nodes (`retrieve`, `grade_docs`, `text_to_sql`, `generate`) and conditional routing edges compiled with error-resilience.
-2. **Hybrid Retrieval with Reciprocal Rank Fusion (`src/retrieval/`)**: Melds semantic Dense Vector similarity and lexical BM25 token frequencies using **RRF** scores to capture both semantic context and exact word matches:
-   $$\text{RRF Score}(d) = \sum_{m \in \text{Retrievers}} \frac{1}{k_{rrf} + r_m(d)}$$
-3. **Parent-Child Granular Chunking (`src/ingestion/`)**: Subdivides documents into overlapping child chunks to optimize precise vector search alignment, but retrieves and passes their holistic parent chunks to the LLM to preserve complete surrounding context.
-4. **Query Translation & HyDE (`src/transformation/`)**: Generates multi-query synonyms and Hypothetical Document Embeddings (HyDE) responses using Gemini models to bridge vocabulary gaps in asymmetric queries.
-5. **Cross-Encoder Re-Ranking & Context Compression (`src/ranking/`)**: Performs token-to-token cross-attention scoring to re-evaluate doc relevance, stripping out irrelevant boilerplate down to individual sentence-level payloads.
-6. **Corrective RAG / CRAG (`src/agents/crag_evaluator.py`)**: Grader agent evaluates retrieval relevance and dynamically triggers web search lookup (Tavily/Google Search) on irrelevant or ambiguous inputs.
-7. **Self-RAG Reflection Loops (`src/agents/self_rag_evaluator.py`)**: Checks for hallucinations (Faithfulness check) against database contexts and verifies response usefulness (Utility check), looping back to generate again if checks fail.
-8. **Structured Text-to-SQL DB Agent (`src/agents/text2sql.py`)**: Seamlessly reflects SQLite DDL schemas, translates natural analytical questions into valid SQLite SELECT commands, executes them, and formats tabular reports.
-9. **NumPy Semantic Cache (`src/cache/`)**: Performs cosine similarity checks over past cached queries, serving identical semantic prompts in sub-milliseconds and bypassing LLM API charges.
+1.  **Stateful Graph Orchestration (`src/graph/`)**: A cyclic state machine defining clear nodes (`retrieve`, `grade_docs`, `text_to_sql`, `generate`) and conditional routing edges compiled with error-resilience and local state retention.
+2.  **Hybrid Retrieval with Reciprocal Rank Fusion (`src/retrieval/`)**: Melds semantic Dense Vector similarity and lexical BM25 token frequencies using **RRF** scores to capture both deep semantic context and exact word matches:
+    $$\text{RRF Score}(d) = \sum_{m \in \text{Retrievers}} \frac{1}{k_{rrf} + r_m(d)}$$
+3.  **Parent-Child Granular Chunking (`src/ingestion/`)**: Subdivides documents into overlapping child chunks to optimize precise vector search alignment, but retrieves and passes their holistic parent chunks to the LLM to preserve complete surrounding context.
+4.  **Query Translation & HyDE (`src/transformation/`)**: Generates multi-query synonyms and Hypothetical Document Embeddings (HyDE) responses using Gemini models to bridge vocabulary gaps in asymmetric queries.
+5.  **Cross-Encoder Re-Ranking & Context Compression (`src/ranking/`)**: Performs token-to-token cross-attention scoring to re-evaluate document relevance, stripping out irrelevant boilerplate down to individual sentence-level payloads.
+6.  **Corrective RAG / CRAG (`src/agents/crag_evaluator.py`)**: Grader agent evaluates retrieval relevance and dynamically triggers web search fallback lookup (Tavily/Google Search) on irrelevant or ambiguous inputs.
+7.  **Self-RAG Reflection Loops (`src/agents/self_rag_evaluator.py`)**: Checks for hallucinations (Faithfulness check) against database contexts and verifies response usefulness (Utility check), looping back to generate again if checks fail.
+8.  **Structured Text-to-SQL DB Agent (`src/agents/text2sql.py`)**: Seamlessly reflects SQLite DDL schemas, translates natural analytical questions into valid SQLite SELECT commands, executes them, and formats tabular reports.
+9.  **NumPy Semantic Cache (`src/cache/`)**: Performs cosine similarity checks over past cached queries using unit-normalized vector structures, serving identical semantic prompts in sub-milliseconds and bypassing LLM API charges:
+    $$\text{Similarity} = \frac{\vec{q}_{new} \cdot \vec{q}_{cached}}{\|\vec{q}_{new}\| \|\vec{q}_{cached}\|}$$
 10. **Enterprise Security Guardrails (`src/guardrails/`)**: Scans input prompts for injections, overrides, or jailbreaks, and sanitizes output vectors for secret token leaks (AWS/API keys) or PII (SSN/emails).
 
 ---
@@ -73,138 +80,71 @@ graph TD
 
 ```
 enterprise-advanced-rag/
-│
-├── .env.example                     # Environment variable template
-├── .gitignore                       # Staging exclusions rules
-├── requirements.txt                 # Exact python dependencies
-├── setup.py                         # Local editable package installer
-├── app.py                           # Beautiful Streamlit visual dashboard UI
-│
-├── data/                            # Raw corpus datasets & relational databases
-│   ├── sample_corpus/               # Seeded company policy and technical guides
-│   │   ├── hr_policy.md
-│   │   ├── architecture_guide.md
-│   │   └── cloud_security.md
-│   └── business_metrics.db          # Seeded SQLite database (200 sales transactions)
-│
-├── notebooks/                       # 8 Step-by-Step Educational Jupyter Notebooks
-│   ├── 01_data_ingestion_hybrid_search.ipynb
-│   ├── 02_query_transformation_hyde.ipynb
-│   ├── 03_reranking_context_compression.ipynb
-│   ├── 04_corrective_rag_crag.ipynb
-│   ├── 05_self_rag.ipynb
-│   ├── 06_structured_text2sql.ipynb
-│   ├── 07_caching_and_guardrails.ipynb
-│   └── 08_langgraph_orchestrator.ipynb
-│
-├── scripts/                         # Seeding compilers and validation runners
-│   ├── seed_db.py                   # Creates and seeds the mock SQLite transactional DB
-│   ├── generate_notebooks.py        # Programmatically builds the Jupyter Notebook files
-│   ├── test_integration.py          # Zero-dependency integration unit test runner
-│   └── demo_run.py                  # Live scenario pipeline query demonstrations
-│
-├── src/                             # Production-grade Modular Codebase
-│   ├── __init__.py                  # Exposes package API entrypoints
-│   ├── config.py                    # Environment loader with MockLLM fallback engines
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   └── embedding_loader.py      # SentenceTransformers caching or MockEmbeddingModel
-│   ├── ingestion/
-│   │   ├── __init__.py
-│   │   └── chunking.py              # Parent-Child splitting algorithms
-│   ├── retrieval/
-│   │   ├── __init__.py
-│   │   └── hybrid.py                # NumPy Local Vector DB + BM25 Okapi + RRF Fusion
-│   ├── transformation/
-│   │   ├── __init__.py
-│   │   └── hyde.py                  # Synonym rewrites and HyDE document generators
-│   ├── ranking/
-│   │   ├── __init__.py
-│   │   └── reranker.py              # Cross-Encoder re-ranker + sentence compressors
-│   ├── agents/
-│   │   ├── __init__.py
-│   │   ├── crag_evaluator.py        # Correct/Incorrect Document Grader
-│   │   ├── self_rag_evaluator.py    # Faithfulness and Utility verification nodes
-│   │   └── text2sql.py              # DB schema reflection and Text-to-SQL queries
-│   ├── cache/
-│   │   ├── __init__.py
-│   │   └── semantic_cache.py        # SQLite Cosine similarity cache store
-│   └── guardrails/
-│       ├── __init__.py
-│       └── validator.py             # prompt injection blocking and PII redactor
-│
-└── tests/                           # Unit tests suite (pytest compatible structure)
-    ├── __init__.py
-    ├── test_guardrails.py
-    ├── test_langgraph.py
-    └── test_retrieval.py
+├── README.md                 # Technical system manual (this file)
+├── .env.example              # Environment variable template
+├── .gitignore                # Staging exclusions rules
+├── requirements.txt          # Python dependencies
+├── setup.py                  # Local editable package installer
+├── app.py                    # Interactive demo dashboard (Streamlit/FastAPI)
+├── data/                     # Local document corpora and SQLite databases
+├── notebooks/                # RAG development and evaluation notebooks
+├── src/                      # Core production codebase
+│   ├── agents/               # CRAG, Self-RAG, and Text-to-SQL agents
+│   ├── cache/                # NumPy-based semantic caching module
+│   ├── graph/                # LangGraph state configurations and compiled models
+│   ├── guardrails/           # Input/Output sanitizers and PII filters
+│   ├── ingestion/            # Parent-Child chunking and vector builders
+│   ├── ranking/              # Cross-Encoder re-ranking and summarizers
+│   ├── retrieval/            # Hybrid vector + BM25 and RRF processors
+│   └── transformation/       # Query translation and HyDE generators
+└── tests/                    # Core verification and unit tests
 ```
 
 ---
 
-## 🛠️ Installation & Setup
+## ⚙️ Quick Start Installation
 
-### 1. Initialize and configure the Environment
-Create your `.env` configuration file from the template:
+Follow these instructions to launch the interactive demo and local development environment:
+
+### 1. Clone & Enter Repository
+```bash
+git clone https://github.com/Rishav-raj-github/enterprise-advanced-rag.git
+cd enterprise-advanced-rag
+```
+
+### 2. Configure Environment Variables
+Duplicate the environment template:
 ```bash
 cp .env.example .env
 ```
-*(Optional: Open `.env` and add your `GOOGLE_API_KEY` to hook up live Gemini generative engines instead of our Mock LLM Client fallback).*
+Open `.env` and supply your API keys:
+```env
+GOOGLE_API_KEY=your_gemini_api_key_here
+TAVILY_API_KEY=your_tavily_web_search_key_here
+# Optional configuration parameters:
+EMBEDDING_MODEL=models/embedding-001
+GENERATOR_MODEL=gemini-2.0-flash
+```
 
-### 2. Install Project Dependencies
-To install the complete cognitive pipeline, run:
+### 3. Install Package & Dependencies
+Initialize a clean Python virtual environment and run the local package installer:
 ```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Install in editable mode along with requirements
 pip install -r requirements.txt
-# Install the library locally in editable mode
 pip install -e .
 ```
 
-### 3. Run the Zero-Dependency Test Suite
-To verify the vector similarity math, cache hits, guardrails, and graph state transitions are 100% green and operational immediately:
+### 4. Seed Database & Run Dashboard
+Before querying, compile the vector databases and SQLite schemas:
 ```bash
-python scripts/test_integration.py
+python scripts/seed_database.py
 ```
-
----
-
-## 🚀 Interactive UI Dashboard
-
-To launch our gorgeous Streamlit Command Dashboard which renders live pipeline latency metrics, active execution graph traces, SQL query records, and doc grader statuses directly in your browser, run:
+Start the local Streamlit dashboard to interact with the cyclic graph:
 ```bash
 streamlit run app.py
 ```
-
----
-
-## 🧪 Production Usage Example
-
-Using the Compiled LangGraph platform in your production Python scripts is incredibly simple:
-
-```python
-from src.graph.pipeline import AdvancedRAGPipeline
-import os
-
-# Initialize pipeline pointing to corpus directory
-corpus_dir = "data/sample_corpus"
-pipeline = AdvancedRAGPipeline(corpus_dir)
-
-# 1. Execute unstructured corporate policy query (RAG path)
-res_rag = pipeline.run("What are remote work home setup stipends?")
-print("Answer:", res_rag["generation"])
-print("Execution Path Trace:", res_rag["execution_trace"])
-
-# 2. Execute structured analytics query (Text-to-SQL path)
-res_sql = pipeline.run("What is the top SaaS product by sales revenue?")
-print("Answer:", res_sql["generation"])
-print("SQL Run:", res_sql.get("sql_query"))
-```
-
----
-
-## 🛡️ Zero-Dependency Resilience Design
-
-To ensure the repository operates cleanly **immediately upon clone**, we programmatically compiled a zero-dependency fallback framework. If heavy NLP libraries or API keys are missing:
-*   **Vector DB Fallback**: Replaced by a high-fidelity NumPy vector array executing dot-product Cosine Similarity.
-*   **Embedding Model Fallback**: Replaced by `MockEmbeddingModel` yielding 384-dimensional normalized vectors with semantic term weight activations so semantic tests pass flawlessly.
-*   **BM25 Fallback**: Replaced by a custom, NumPy-optimized `BM25Okapi` term statistics implementation.
-*   **State Graph Fallback**: Replaced by a native Python state transitions manager executing state nodes and conditional edges identically to LangGraph.
+Open **[http://localhost:8501](http://localhost:8501)** in your browser and trace your queries through the LangGraph cognitive loops!
